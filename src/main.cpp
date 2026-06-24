@@ -6,6 +6,14 @@
  */
 #include "Arduino.h"
 
+
+enum Flight_state{
+  IDLE,
+  LOGGING,
+  FINISH
+};
+
+Flight_state state = IDLE;
 // Set LED_BUILTIN if it is not defined by Arduino framework
 // #define LED_BUILTIN 13
 
@@ -17,6 +25,21 @@ void setup()
 
 void loop()
 {
+  switch (state)
+  {
+  case IDLE:
+    /* code */
+    break;
+  case LOGGING:
+    /* code */
+    break;
+  case FINISH:
+    /* code */
+    break;
+  
+  default:
+    break;
+  }
   // turn the LED on (HIGH is the voltage level)
   digitalWrite(LED_BUILTIN, HIGH);
 
