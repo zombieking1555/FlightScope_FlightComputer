@@ -8,7 +8,7 @@ void initIMU(
     lsm6ds_data_rate_t accelRate, 
     lsm6ds_data_rate_t gyroRate);
 
-void periodic();
+void imuPeriodic();
 
 sensors_event_t getGyroEvent();
 

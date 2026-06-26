@@ -17,8 +17,10 @@ Flight_state state = IDLE;
 // Set LED_BUILTIN if it is not defined by Arduino framework
 // #define LED_BUILTIN 13
 
-void setup()
-{
+void setup(){
+  Serial.begin(115200);
+    while (!Serial)
+        delay(10);
   // initialize LED digital pin as an output.
   pinMode(LED_BUILTIN, OUTPUT);
 }

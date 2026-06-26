@@ -13,7 +13,7 @@ void initAltimeter();
     @return Success of value read
 */
 /**************************************************************************/
-bool readNewValues();
+bool altimeterPeriodic();
 
 double getTempCelcius();
 double getPressureKPA();

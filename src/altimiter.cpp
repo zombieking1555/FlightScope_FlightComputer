@@ -6,8 +6,6 @@
 Adafruit_BMP3XX bmp;
 
 void initAltimeter(){
-    Serial.begin(115200);
-    while ( (!Serial));
     Serial.println("Adafruit BMP388 test");
     
     if(!bmp.begin_I2C()){
@@ -21,7 +19,11 @@ void initAltimeter(){
     bool iir = bmp.setIIRFilterCoeff(BMP3_IIR_FILTER_COEFF_3);
     bool rate = bmp.setOutputDataRate(BMP3_ODR_50_HZ);
     
-    Serial.println("Temperature Oversampling set successfully: ");
+    if(temp && pressure && iir && rate){
+    Serial.println("Altimeter configured successfully.");
+    } else {
+    Serial.println("Altimeter was not successfully configured.");
+    }
 }
 
 /**************************************************************************/
@@ -33,7 +35,7 @@ void initAltimeter(){
     @return Success of value read
 */
 /**************************************************************************/
-bool readNewValues(){
+bool altimeterPeriodic(){
     if(bmp.performReading()){
         return true;
     } else {

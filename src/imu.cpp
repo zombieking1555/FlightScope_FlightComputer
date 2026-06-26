@@ -5,11 +5,7 @@ sensors_event_t accel;
 sensors_event_t gyro;
 sensors_event_t temp;
 
-void initIMU(lsm6dso32_accel_range_t accel_range, lsm6ds_gyro_range_t gyro_range, lsm6ds_data_rate_t accelRate, lsm6ds_data_rate_t gyroRate){
-    Serial.begin(115200);
-    while (!Serial)
-        delay(10);
-    
+void initIMU(lsm6dso32_accel_range_t accel_range, lsm6ds_gyro_range_t gyro_range, lsm6ds_data_rate_t accelRate, lsm6ds_data_rate_t gyroRate){  
     Serial.println("Adafruit LSM6DSO32 Test\n");
     
     if(!dso32.begin_I2C()){
@@ -154,7 +150,7 @@ void initIMU(lsm6dso32_accel_range_t accel_range, lsm6ds_gyro_range_t gyro_range
   Serial.println("============================================");
 }
 
-void periodic(){
+void imuPeriodic(){
     dso32.getEvent(&accel, &gyro, &temp);
 }
 
