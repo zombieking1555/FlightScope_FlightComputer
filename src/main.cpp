@@ -1,19 +1,11 @@
-/**
- * Blink
- *
- * Turns on an LED on for one second,
- * then off for one second, repeatedly.
- */
 #include "Arduino.h"
+#include "logger.h"
+#include "imu.h"
+#include "altimeter.h"
+#include "flightState.h"
+#include <Adafruit_LSM6DSO32.h>
 
-
-enum Flight_state{
-  IDLE,
-  LOGGING,
-  FINISH
-};
-
-Flight_state state = IDLE;
+flight_state state = IDLE;
 // Set LED_BUILTIN if it is not defined by Arduino framework
 // #define LED_BUILTIN 13
 
@@ -23,6 +15,9 @@ void setup(){
         delay(10);
   // initialize LED digital pin as an output.
   pinMode(LED_BUILTIN, OUTPUT);
+  initAltimeter();
+  initIMU(LSM6DSO32_ACCEL_RANGE_16_G, LSM6DS_GYRO_RANGE_1000_DPS, LSM6DS_RATE_1_66K_HZ, LSM6DS_RATE_1_66K_HZ);
+  initLogger();
 }
 
 void loop()
