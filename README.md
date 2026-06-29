@@ -167,7 +167,7 @@ Contributions, suggestions, and feature requests are welcome. Feel free to open 
 
 # License
 
-This project is licensed under the MIT License. See the `LICENSE` file for details.
+This project is licensed under the MIT License, in addition to Adafruit software licenses. See `LICENSE.md` for details.
 
 ---
 
