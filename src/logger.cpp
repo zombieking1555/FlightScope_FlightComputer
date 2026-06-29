@@ -71,7 +71,9 @@ void loggerPeriodic(double altitudeMeters, sensors_event_t gyro, sensors_event_t
         if (cacheHead == 0)
             cacheFull = true;
         break;
-
+    case LAUNCH:
+        flushCache();
+        break;
     case LOGGING:
         // Append one line
         logFile.print(millis());
@@ -100,15 +102,33 @@ void loggerPeriodic(double altitudeMeters, sensors_event_t gyro, sensors_event_t
     }
 }
 
-void flushCache(File& logFile) {
+void flushCache() {
 
     if (cacheFull) {
         for (int i = cacheHead; i < CACHE_SIZE; i++)
-            logFile.println(cache[i]);
+            writeSample(cache[i]);
     }
 
     for (int i = 0; i < cacheHead; i++)
-        logFile.println(cache[i]);
+        writeSample(cache[i]);
+}
+
+void writeSample(const FlightSample& sample) {
+    logFile.print(sample.time);
+    logFile.print(",");
+    logFile.print(sample.ax);
+    logFile.print(",");
+    logFile.print(sample.ay);
+    logFile.print(",");
+    logFile.print(sample.az);
+    logFile.print(",");
+    logFile.print(sample.gx);
+    logFile.print(",");
+    logFile.print(sample.gy);
+    logFile.print(",");
+    logFile.print(sample.gz);
+    logFile.print(",");
+    logFile.print(sample.altitude);
 }
 
 void endFlight()
