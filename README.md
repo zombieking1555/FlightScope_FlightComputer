@@ -1,6 +1,6 @@
 # FlightScope FlightCore
 
-![Flightscope_Flightcore_Banner](assets/Flightscope Flightcore logo.png)
+![Flightscope_Flightcore_Banner](assets/Flightscope_Flightcore_logo.png)
 
 The embedded flight computer powering FlightScope, designed to autonomously record high-frequency rocket telemetry for post-flight analysis.
 
