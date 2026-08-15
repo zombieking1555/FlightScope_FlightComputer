@@ -1,7 +1,8 @@
 #ifndef FLIGHTSTATE_H
 #define FLIGHTSTATE_H
 
-enum flight_state{
+enum flight_state {
+  INIT,
   IDLE,
   LAUNCH,
   LANDING,
@@ -9,4 +10,4 @@ enum flight_state{
   FINISH
 };
 
-#endif FLIGHTSTATE_H
+#endif // FLIGHTSTATE_H

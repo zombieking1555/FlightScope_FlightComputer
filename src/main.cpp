@@ -4,8 +4,10 @@
 #include "altimeter.h"
 #include "flightState.h"
 #include <Adafruit_LSM6DSO32.h>
+#include <Wire.h>
 
-flight_state state = IDLE;
+flight_state state = INIT;
+int initCounter = 0;
 double launchAltitude;
 double landingCount = 0;
 
@@ -17,6 +19,27 @@ void setup(){
   Serial.begin(115200);
     while (!Serial)
         delay(10);
+       
+  Wire.setSDA(4);
+  Wire.setSCL(5);
+  Wire.begin();
+  
+
+    Serial.println("Scanning I2C...");
+
+    for (uint8_t address = 1; address < 127; address++) {
+        Wire.beginTransmission(address);
+
+        if (Wire.endTransmission() == 0) {
+            Serial.print("Found I2C device at 0x");
+            if (address < 16)
+                Serial.print("0");
+            Serial.println(address, HEX);
+        }
+    }
+
+    Serial.println("I2C scan complete.");
+
   // initialize LED digital pin as an output.
   pinMode(LED_BUILTIN, OUTPUT);
   initAltimeter();
@@ -28,30 +51,50 @@ void loop()
 {
   altimeterPeriodic();
   imuPeriodic();
+  // Serial.print(" | Accel: " + String(getAccelEvent().acceleration.x) + ", " + String(getAccelEvent().acceleration.y) + ", " + String(getAccelEvent().acceleration.z));
+  // Serial.println(" | Gyro: " + String(getGyroEvent().gyro.x) + ", " + String(getGyroEvent().gyro.y) + ", " + String(getGyroEvent().gyro.z));
   loggerPeriodic(getAltitudeMeters(), getGyroEvent(), getAccelEvent(), state);
   switch (state)
   {
+  case INIT:
+    Serial.println(initCounter);
+    initCounter++;
+    if(initCounter > 500){
+      launchAltitude = getAltitudeMeters();
+      Serial.println("Flight initialized");
+      state = IDLE;
+    }
+    break;
   case IDLE:
-    launchAltitude = getAltitudeMeters();
-    if(getAccelEvent().acceleration.z > 20){
+  
+    Serial.println("Altitude: " + String(getAltitudeMeters()) + " m - Launch Altitude: " + String(launchAltitude));
+    // if(getAccelEvent().acceleration.z > 20){
+    if(getAltitudeMeters() > launchAltitude + .5){
       state = LAUNCH;
     }
     break;
   case LAUNCH:
+    Serial.println("Launch detected");
     state = LOGGING;
+    Serial.println("Logging started");
   break;
   case LOGGING:
-    if(getAltitudeMeters() <= launchAltitude + .5)
+    if(getAltitudeMeters() <= launchAltitude + .5){
       landingCount++;
+      Serial.println("Landing count: " + String(landingCount));
+    }
     else
       landingCount = 0;
     if(landingCount >= 500)
       state = LANDING;
     break;
   case LANDING:
+    Serial.println("Landing detected");
     endFlight();
     state = FINISH;
+    break;
   case FINISH:
+    Serial.println("Flight finished");
     break;
   }
   

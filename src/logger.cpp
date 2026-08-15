@@ -1,15 +1,7 @@
 #include "flightState.h"
+#include <Arduino.h>
 #include <SD.h>
 #include <Adafruit_LSM6DSO32.h>
-
-constexpr int CACHE_SIZE = 200;
-
-FlightSample cache[CACHE_SIZE];
-
-File logFile;
-
-int cacheHead = 0;
-bool cacheFull = false;
 
 struct FlightSample {
     uint32_t time;
@@ -25,9 +17,21 @@ struct FlightSample {
     float altitude;
 };
 
-long lastFlush = millis();
+constexpr int CACHE_SIZE = 200;
+
+FlightSample cache[CACHE_SIZE];
+File logFile;
+
+int cacheHead = 0;
+bool cacheFull = false;
+
+long lastFlush = 0;
+
 // TODO: find correct pin
 #define SD_CS_PIN 10
+
+void writeSample(const FlightSample& sample);
+void flushCache();
 
 void initLogger()
 {
@@ -44,16 +48,17 @@ void initLogger()
 
     logFile = SD.open(fileName, FILE_WRITE);
 
-    // Write CSV header
-    logFile.println("time (ms),acceleration x (m/s^2),acceleration y (m/s^2),acceleration z (m/s^2),gyro x (rad),gyro y (rad),gyro z (rad),altitude (m)");
+    if (logFile) {
+        logFile.println("time (ms),acceleration x (m/s^2),acceleration y (m/s^2),acceleration z (m/s^2),gyro x (rad),gyro y (rad),gyro z (rad),altitude (m)");
+    }
 }
 
 void loggerPeriodic(double altitudeMeters, sensors_event_t gyro, sensors_event_t accel, flight_state state)
 {
-
     switch (state)
     {
     case IDLE:
+    {
         FlightSample sample;
         sample.altitude = altitudeMeters;
         sample.ax = accel.acceleration.x;
@@ -64,13 +69,14 @@ void loggerPeriodic(double altitudeMeters, sensors_event_t gyro, sensors_event_t
         sample.gz = gyro.gyro.z;
         sample.time = millis();
 
-         cache[cacheHead] = sample;
+        cache[cacheHead] = sample;
 
         cacheHead = (cacheHead + 1) % CACHE_SIZE;
 
         if (cacheHead == 0)
             cacheFull = true;
         break;
+    }
     case LAUNCH:
         flushCache();
         break;
@@ -99,18 +105,10 @@ void loggerPeriodic(double altitudeMeters, sensors_event_t gyro, sensors_event_t
             lastFlush = millis();
         }
         break;
+    case LANDING:
+    case FINISH:
+        break;
     }
-}
-
-void flushCache() {
-
-    if (cacheFull) {
-        for (int i = cacheHead; i < CACHE_SIZE; i++)
-            writeSample(cache[i]);
-    }
-
-    for (int i = 0; i < cacheHead; i++)
-        writeSample(cache[i]);
 }
 
 void writeSample(const FlightSample& sample) {
@@ -129,6 +127,16 @@ void writeSample(const FlightSample& sample) {
     logFile.print(sample.gz);
     logFile.print(",");
     logFile.print(sample.altitude);
+}
+
+void flushCache() {
+    if (cacheFull) {
+        for (int i = cacheHead; i < CACHE_SIZE; i++)
+            writeSample(cache[i]);
+    }
+
+    for (int i = 0; i < cacheHead; i++)
+        writeSample(cache[i]);
 }
 
 void endFlight()
