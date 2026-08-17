@@ -2,7 +2,7 @@
 #define IMU_H
 #include <Adafruit_LSM6DSO32.h>
 
-void initIMU(
+bool initIMU(
     lsm6dso32_accel_range_t accel_range, 
     lsm6ds_gyro_range_t gyro_range, 
     lsm6ds_data_rate_t accelRate, 

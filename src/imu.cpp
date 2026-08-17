@@ -5,14 +5,13 @@ sensors_event_t accel;
 sensors_event_t gyro;
 sensors_event_t temp;
 
-void initIMU(lsm6dso32_accel_range_t accel_range, lsm6ds_gyro_range_t gyro_range, lsm6ds_data_rate_t accelRate, lsm6ds_data_rate_t gyroRate){  
+bool initIMU(lsm6dso32_accel_range_t accel_range, lsm6ds_gyro_range_t gyro_range, lsm6ds_data_rate_t accelRate, lsm6ds_data_rate_t gyroRate){  
     Serial.println("Adafruit LSM6DSO32 Test\n");
     
     if(!dso32.begin_I2C()){
-        while (1)
-        {
-            delay(10);
-        }   
+        Serial.println("ERROR:Valid LSM6DSO32 Sensor Not Found.");
+        return false;
+        
     }
 
     Serial.println("LSM6DO32 Found\n");
@@ -148,6 +147,7 @@ void initIMU(lsm6dso32_accel_range_t accel_range, lsm6ds_gyro_range_t gyro_range
   Serial.println("============================================");
   Serial.println("IMU Successfully initialized.");
   Serial.println("============================================");
+  return true;
 }
 
 void imuPeriodic(){

@@ -5,13 +5,12 @@
 
 Adafruit_BMP3XX bmp;
 
-void initAltimeter(){
+bool initAltimeter(){
     Serial.println("Adafruit BMP388 test");
     
     if(!bmp.begin_I2C()){
-        Serial.println("Valid BMP3 Sensor Not Found.");
-        while(1);
-        
+        Serial.println("ERROR: Valid BMP3 Sensor Not Found.");
+        return false;
     }
 
     bool temp = bmp.setTemperatureOversampling(BMP3_OVERSAMPLING_8X);
@@ -23,7 +22,9 @@ void initAltimeter(){
     Serial.println("Altimeter configured successfully.");
     } else {
     Serial.println("Altimeter was not successfully configured.");
+    return false;
     }
+    return true;
 }
 
 /**************************************************************************/

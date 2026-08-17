@@ -1,7 +1,7 @@
 #ifndef ALTIMETER_H
 #define ALTIMETER_H
 
-void initAltimeter();
+bool initAltimeter();
 
 /**************************************************************************/
 /*!

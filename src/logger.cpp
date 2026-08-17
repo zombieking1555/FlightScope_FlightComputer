@@ -1,6 +1,7 @@
 #include "flightState.h"
 #include <Arduino.h>
 #include <SD.h>
+#include <SPI.h>
 #include <Adafruit_LSM6DSO32.h>
 
 struct FlightSample {
@@ -28,14 +29,24 @@ bool cacheFull = false;
 long lastFlush = 0;
 
 // TODO: find correct pin
-#define SD_CS_PIN 10
+#define SD_CS_PIN 17
 
 void writeSample(const FlightSample& sample);
 void flushCache();
 
-void initLogger()
+bool initLogger()
 {
-    SD.begin(SD_CS_PIN);
+    SPI.setRX(16);
+    SPI.setCS(SD_CS_PIN);
+    SPI.setSCK(18);
+    SPI.setTX(19);
+    SPI.begin();
+    if(!SD.begin(SD_CS_PIN)) {
+        Serial.println("SD initialization FAILED");
+        return false;
+    } else {
+        Serial.println("SD initialization SUCCESS.");
+    }
 
     int fileNum = 0;
     String fileName;
@@ -51,6 +62,7 @@ void initLogger()
     if (logFile) {
         logFile.println("time (ms),acceleration x (m/s^2),acceleration y (m/s^2),acceleration z (m/s^2),gyro x (rad),gyro y (rad),gyro z (rad),altitude (m)");
     }
+    return true;
 }
 
 void loggerPeriodic(double altitudeMeters, sensors_event_t gyro, sensors_event_t accel, flight_state state)

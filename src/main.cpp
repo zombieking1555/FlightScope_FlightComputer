@@ -42,9 +42,11 @@ void setup(){
 
   // initialize LED digital pin as an output.
   pinMode(LED_BUILTIN, OUTPUT);
-  initAltimeter();
-  initIMU(LSM6DSO32_ACCEL_RANGE_16_G, LSM6DS_GYRO_RANGE_1000_DPS, LSM6DS_RATE_1_66K_HZ, LSM6DS_RATE_1_66K_HZ);
-  initLogger();
+  if(!initLogger() || !initAltimeter() || !initIMU(LSM6DSO32_ACCEL_RANGE_16_G, LSM6DS_GYRO_RANGE_1000_DPS, LSM6DS_RATE_1_66K_HZ, LSM6DS_RATE_1_66K_HZ)){
+    Serial.println("ERROR: One or more sensors failed to initialize.");
+    while(1);
+  }
+  
 }
 
 void loop()
