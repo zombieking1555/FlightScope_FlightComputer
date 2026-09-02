@@ -3,6 +3,7 @@
 #include "imu.h"
 #include "altimeter.h"
 #include "flightState.h"
+#include "led.h"
 #include <Adafruit_LSM6DSO32.h>
 #include <Wire.h>
 
@@ -41,11 +42,12 @@ void setup(){
     Serial.println("I2C scan complete.");
 
   // initialize LED digital pin as an output.
-  pinMode(LED_BUILTIN, OUTPUT);
   if(!initLogger() || !initAltimeter() || !initIMU(LSM6DSO32_ACCEL_RANGE_16_G, LSM6DS_GYRO_RANGE_1000_DPS, LSM6DS_RATE_1_66K_HZ, LSM6DS_RATE_1_66K_HZ)){
     Serial.println("ERROR: One or more sensors failed to initialize.");
     while(1);
   }
+
+  initLed();
   
 }
 
@@ -59,6 +61,7 @@ void loop()
   switch (state)
   {
   case INIT:
+    ledRapidBlink();
     Serial.println(initCounter);
     initCounter++;
     if(initCounter > 500){
@@ -66,9 +69,11 @@ void loop()
       Serial.println("Flight initialized");
       state = IDLE;
     }
+
     break;
   case IDLE:
-  
+    
+    ledSlowBlink();
     Serial.println("Altitude: " + String(getAltitudeMeters()) + " m - Launch Altitude: " + String(launchAltitude));
     // if(getAccelEvent().acceleration.z > 20){
     if(getAltitudeMeters() > launchAltitude + .5){
@@ -81,6 +86,8 @@ void loop()
     Serial.println("Logging started");
   break;
   case LOGGING:
+    
+    ledFastBlink();
     if(getAltitudeMeters() <= launchAltitude + .5){
       landingCount++;
       Serial.println("Landing count: " + String(landingCount));
@@ -96,6 +103,8 @@ void loop()
     state = FINISH;
     break;
   case FINISH:
+  
+    ledSlowBlink();
     Serial.println("Flight finished");
     break;
   }
