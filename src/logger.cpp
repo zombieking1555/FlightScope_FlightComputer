@@ -92,7 +92,8 @@ void loggerPeriodic(double altitudeMeters, sensors_event_t gyro, sensors_event_t
     case LAUNCH:
         flushCache();
         break;
-    case LOGGING:
+    case LOGGINGUP:
+    case LOGGINGDOWN:
         // Append one line
         logFile.print(millis());
         logFile.print(",");

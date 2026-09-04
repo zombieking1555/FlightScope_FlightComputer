@@ -6,7 +6,8 @@ enum flight_state {
   IDLE,
   LAUNCH,
   LANDING,
-  LOGGING,
+  LOGGINGUP,
+  LOGGINGDOWN,
   FINISH
 };
 

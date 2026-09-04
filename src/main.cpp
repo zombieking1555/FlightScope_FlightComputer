@@ -6,13 +6,15 @@
 #include "led.h"
 #include <Adafruit_LSM6DSO32.h>
 #include <Wire.h>
+#include <ejection.h>
 
 flight_state state = INIT;
 int initCounter = 0;
 double launchAltitude;
+double highestAltitude;
 double landingCount = 0;
+double apogeeCount = 0;
 
-double ledCount = 0;
 // Set LED_BUILTIN if it is not defined by Arduino framework
 // #define LED_BUILTIN 13
 
@@ -48,11 +50,16 @@ void setup(){
   }
 
   initLed();
+  initEjection();
   
 }
 
 void loop()
 {
+  noEjectionLoop();
+}
+
+void noEjectionLoop(){
   altimeterPeriodic();
   imuPeriodic();
   // Serial.print(" | Accel: " + String(getAccelEvent().acceleration.x) + ", " + String(getAccelEvent().acceleration.y) + ", " + String(getAccelEvent().acceleration.z));
@@ -66,6 +73,7 @@ void loop()
     initCounter++;
     if(initCounter > 500){
       launchAltitude = getAltitudeMeters();
+      highestAltitude = launchAltitude;
       Serial.println("Flight initialized");
       state = IDLE;
     }
@@ -76,16 +84,37 @@ void loop()
     ledSlowBlink();
     Serial.println("Altitude: " + String(getAltitudeMeters()) + " m - Launch Altitude: " + String(launchAltitude));
     // if(getAccelEvent().acceleration.z > 20){
-    if(getAltitudeMeters() > launchAltitude + .5){
+    if(getAltitudeMeters() > launchAltitude + .3){
       state = LAUNCH;
     }
     break;
   case LAUNCH:
     Serial.println("Launch detected");
-    state = LOGGING;
+    state = LOGGINGUP;
     Serial.println("Logging started");
   break;
-  case LOGGING:
+  case LOGGINGUP:
+    
+    ledFastBlink();
+    double altitude = getAltitudeMeters();
+
+    if(altitude > highestAltitude){
+      highestAltitude = altitude;
+    }
+
+    if(altitude <= highestAltitude - .5){
+      apogeeCount++;
+      Serial.println("Apogee count: " + String(apogeeCount));
+    } else {
+      apogeeCount = 0;
+    }
+
+    if(apogeeCount >=10){
+      Serial.println("Apogee detected");
+      state = LOGGINGDOWN;
+    }
+  break;
+  case LOGGINGDOWN:
     
     ledFastBlink();
     if(getAltitudeMeters() <= launchAltitude + .5){
@@ -108,22 +137,11 @@ void loop()
     Serial.println("Flight finished");
     break;
   }
-  
-  //LED Loop, one second on, one second off
-  if(ledCount < 100){
-    // turn the LED on (HIGH is the voltage level)
-    digitalWrite(LED_BUILTIN, HIGH);
-    ledCount++;
-  }
-  
-  if(ledCount >= 100){
-    // turn the LED off by making the voltage LOW
-    digitalWrite(LED_BUILTIN, LOW);
-    ledCount++;
-    if(ledCount > 200)
-      ledCount = 0;
-  }
-  
   //logging loop delay
   delay(10);
 }
+
+  void mosfetTestingLoop(){
+    ejectionPeriodic(state);
+    noEjectionLoop();
+  }
