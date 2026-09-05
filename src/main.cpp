@@ -20,8 +20,6 @@ double apogeeCount = 0;
 
 void setup(){
   Serial.begin(115200);
-    while (!Serial)
-        delay(10);
        
   Wire.setSDA(4);
   Wire.setSCL(5);
@@ -52,11 +50,6 @@ void setup(){
   initLed();
   initEjection();
   
-}
-
-void loop()
-{
-  noEjectionLoop();
 }
 
 void noEjectionLoop(){
@@ -94,7 +87,7 @@ void noEjectionLoop(){
     Serial.println("Logging started");
   break;
   case LOGGINGUP:
-    
+    {
     ledFastBlink();
     double altitude = getAltitudeMeters();
 
@@ -113,7 +106,9 @@ void noEjectionLoop(){
       Serial.println("Apogee detected");
       state = LOGGINGDOWN;
     }
+  
   break;
+    }
   case LOGGINGDOWN:
     
     ledFastBlink();
@@ -145,3 +140,9 @@ void noEjectionLoop(){
     ejectionPeriodic(state);
     noEjectionLoop();
   }
+
+void loop()
+{
+  noEjectionLoop();
+}
+
