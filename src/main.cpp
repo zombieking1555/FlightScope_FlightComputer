@@ -143,6 +143,6 @@ void noEjectionLoop(){
 
 void loop()
 {
-  noEjectionLoop();
+  mosfetTestingLoop();
 }
 
