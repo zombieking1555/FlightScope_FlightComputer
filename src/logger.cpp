@@ -2,7 +2,6 @@
 #include <Arduino.h>
 #include <SD.h>
 #include <SPI.h>
-#include <Adafruit_LSM6DSO32.h>
 
 struct FlightSample {
     uint32_t time;
@@ -65,20 +64,22 @@ bool initLogger()
     return true;
 }
 
-void loggerPeriodic(double altitudeMeters, sensors_event_t gyro, sensors_event_t accel, flight_state state)
+void loggerPeriodic(double altitudeMeters, flight_state state)
 {
+    const float zeroValue = 0.0f;
+
     switch (state)
     {
     case IDLE:
     {
         FlightSample sample;
         sample.altitude = altitudeMeters;
-        sample.ax = accel.acceleration.x;
-        sample.ay = accel.acceleration.y;
-        sample.az = accel.acceleration.z;
-        sample.gx = gyro.gyro.x;
-        sample.gy = gyro.gyro.y;
-        sample.gz = gyro.gyro.z;
+        sample.ax = zeroValue;
+        sample.ay = zeroValue;
+        sample.az = zeroValue;
+        sample.gx = zeroValue;
+        sample.gy = zeroValue;
+        sample.gz = zeroValue;
         sample.time = millis();
 
         cache[cacheHead] = sample;
@@ -94,20 +95,20 @@ void loggerPeriodic(double altitudeMeters, sensors_event_t gyro, sensors_event_t
         break;
     case LOGGINGUP:
     case LOGGINGDOWN:
-        // Append one line
+        // Append one line with zeroed motion data because the IMU has been removed.
         logFile.print(millis());
         logFile.print(",");
-        logFile.print(accel.acceleration.x);
+        logFile.print(zeroValue);
         logFile.print(",");
-        logFile.print(accel.acceleration.y);
+        logFile.print(zeroValue);
         logFile.print(",");
-        logFile.print(accel.acceleration.z);
+        logFile.print(zeroValue);
         logFile.print(",");
-        logFile.print(gyro.gyro.x);
+        logFile.print(zeroValue);
         logFile.print(",");
-        logFile.print(gyro.gyro.y);
+        logFile.print(zeroValue);
         logFile.print(",");
-        logFile.print(gyro.gyro.z);
+        logFile.print(zeroValue);
         logFile.print(",");
         logFile.println(altitudeMeters);
 

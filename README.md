@@ -21,7 +21,6 @@ Telemetry recorded by FlightCore can be visualized using the FlightScope desktop
 Connect:
 
 * Raspberry Pi Pico 2
-* Adafruit LSM6DSO32 IMU
 * Adafruit BMP388 Barometric Sensor
 * MicroSD Card Breakout
 * 3.7V LiPo Battery
@@ -64,7 +63,6 @@ FlightCore currently supports:
 | Component                 | Purpose                    |
 | ------------------------- | -------------------------- |
 | Raspberry Pi Pico 2       | Main flight computer       |
-| Adafruit LSM6DSO32        | 6-axis IMU                 |
 | Adafruit BMP388           | Barometric altitude sensor |
 | Adafruit MicroSD Breakout | Telemetry storage          |
 | LiPo Battery              | Power source      |
@@ -118,7 +116,7 @@ FlightCore is designed around one thing:
 
 Once powered, the firmware continuously samples onboard sensors and checks for flight events such as liftoff and landing. When launch acceleration exceeds the configured threshold, FlightCore begins writing telemetry to the microSD card, first flushing a pre-launch data buffer before recording the remainder of the flight.
 
-Throughout flight, data from the IMU and barometric sensor are timestamped into a CSV file. After landing is detected, logging automatically stops and the file is closed, allowing it to be imported directly into the FlightScope dashboard for visualization, analysis, and comparison.
+Throughout flight, barometric sensor data are timestamped into a CSV file. After landing is detected, logging automatically stops and the file is closed, allowing it to be imported directly into the FlightScope dashboard for visualization, analysis, and comparison.
 
 The firmware is organized into independent modules for sensors, logging, flight-state detection, and storage, making it straightforward to extend with additional hardware in future revisions.
 

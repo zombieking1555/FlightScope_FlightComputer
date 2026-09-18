@@ -1,10 +1,8 @@
 #include "Arduino.h"
 #include "logger.h"
-#include "imu.h"
 #include "altimeter.h"
 #include "flightState.h"
 #include "led.h"
-#include <Adafruit_LSM6DSO32.h>
 #include <Wire.h>
 #include <ejection.h>
 
@@ -42,7 +40,7 @@ void setup(){
     Serial.println("I2C scan complete.");
 
   // initialize LED digital pin as an output.
-  if(!initLogger() || !initAltimeter() || !initIMU(LSM6DSO32_ACCEL_RANGE_16_G, LSM6DS_GYRO_RANGE_1000_DPS, LSM6DS_RATE_1_66K_HZ, LSM6DS_RATE_1_66K_HZ)){
+  if(!initLogger() || !initAltimeter()){
     Serial.println("ERROR: One or more sensors failed to initialize.");
     while(1);
   }
@@ -54,10 +52,7 @@ void setup(){
 
 void noEjectionLoop(){
   altimeterPeriodic();
-  imuPeriodic();
-  // Serial.print(" | Accel: " + String(getAccelEvent().acceleration.x) + ", " + String(getAccelEvent().acceleration.y) + ", " + String(getAccelEvent().acceleration.z));
-  // Serial.println(" | Gyro: " + String(getGyroEvent().gyro.x) + ", " + String(getGyroEvent().gyro.y) + ", " + String(getGyroEvent().gyro.z));
-  loggerPeriodic(getAltitudeMeters(), getGyroEvent(), getAccelEvent(), state);
+  loggerPeriodic(getAltitudeMeters(), state);
   switch (state)
   {
   case INIT:
@@ -143,6 +138,6 @@ void noEjectionLoop(){
 
 void loop()
 {
-  mosfetTestingLoop();
+  noEjectionLoop();
 }
 
