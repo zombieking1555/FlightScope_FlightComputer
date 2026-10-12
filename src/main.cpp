@@ -145,8 +145,16 @@ void setup(){
 void noEjectionLoop(){
   static unsigned long reportLoopCount = 0;
   bool altitudeReadValid = altimeterPeriodic();
-  double altitude = getAltitudeMeters();
-  loggerPeriodic(altitude, state);
+  double rawAltitude = getAltitudeMeters();
+  double filteredAltitudeForLogging = filteredAltitude;
+
+  if (altitudeReadValid)
+    filteredAltitudeForLogging = updateFilteredAltitude(rawAltitude);
+
+  loggerPeriodic(rawAltitude,
+                 filteredAltitudeForLogging,
+                 isEjectionOutputActive(),
+                 state);
 
   // Never advance the state machine on a stale BMP388 sample.
   if (!altitudeReadValid) {
@@ -155,7 +163,7 @@ void noEjectionLoop(){
     return;
   }
 
-  double altitudeForDetection = updateFilteredAltitude(altitude);
+  double altitudeForDetection = filteredAltitudeForLogging;
   if (!altitudeFilterReady) {
     delay(10);
     return;

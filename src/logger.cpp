@@ -6,16 +6,9 @@
 struct FlightSample {
     uint32_t time;
     flight_state state;
-
-    float ax;
-    float ay;
-    float az;
-
-    float gx;
-    float gy;
-    float gz;
-
-    float altitude;
+    double rawAltitude;
+    double filteredAltitude;
+    bool ejectionOutputActive;
 };
 
 constexpr int CACHE_SIZE = 200;
@@ -74,28 +67,25 @@ bool initLogger()
     logFile = SD.open(fileName, FILE_WRITE);
 
     if (logFile) {
-        logFile.println("time (ms),acceleration x (m/s^2),acceleration y (m/s^2),acceleration z (m/s^2),gyro x (rad),gyro y (rad),gyro z (rad),altitude (m),flight state");
+        logFile.println("time (ms),raw altitude (m),filtered altitude (m),ejection output,flight state");
     }
     return true;
 }
 
-void loggerPeriodic(double altitudeMeters, flight_state state)
+void loggerPeriodic(double rawAltitudeMeters,
+                    double filteredAltitudeMeters,
+                    bool ejectionOutputActive,
+                    flight_state state)
 {
-    const float zeroValue = 0.0f;
-
     switch (state)
     {
     case IDLE:
     {
         FlightSample sample;
-        sample.altitude = altitudeMeters;
+        sample.rawAltitude = rawAltitudeMeters;
+        sample.filteredAltitude = filteredAltitudeMeters;
+        sample.ejectionOutputActive = ejectionOutputActive;
         sample.state = state;
-        sample.ax = zeroValue;
-        sample.ay = zeroValue;
-        sample.az = zeroValue;
-        sample.gx = zeroValue;
-        sample.gy = zeroValue;
-        sample.gz = zeroValue;
         sample.time = millis();
 
         cache[cacheHead] = sample;
@@ -111,22 +101,13 @@ void loggerPeriodic(double altitudeMeters, flight_state state)
         break;
     case LOGGINGUP:
     case LOGGINGDOWN:
-        // Append one line with zeroed motion data because the IMU has been removed.
         logFile.print(millis());
         logFile.print(",");
-        logFile.print(zeroValue);
+        logFile.print(rawAltitudeMeters);
         logFile.print(",");
-        logFile.print(zeroValue);
+        logFile.print(filteredAltitudeMeters);
         logFile.print(",");
-        logFile.print(zeroValue);
-        logFile.print(",");
-        logFile.print(zeroValue);
-        logFile.print(",");
-        logFile.print(zeroValue);
-        logFile.print(",");
-        logFile.print(zeroValue);
-        logFile.print(",");
-        logFile.print(altitudeMeters);
+        logFile.print(ejectionOutputActive ? "HIGH" : "LOW");
         logFile.print(",");
         logFile.println(flightStateName(state));
 
@@ -146,19 +127,11 @@ void loggerPeriodic(double altitudeMeters, flight_state state)
 void writeSample(const FlightSample& sample) {
     logFile.print(sample.time);
     logFile.print(",");
-    logFile.print(sample.ax);
+    logFile.print(sample.rawAltitude);
     logFile.print(",");
-    logFile.print(sample.ay);
+    logFile.print(sample.filteredAltitude);
     logFile.print(",");
-    logFile.print(sample.az);
-    logFile.print(",");
-    logFile.print(sample.gx);
-    logFile.print(",");
-    logFile.print(sample.gy);
-    logFile.print(",");
-    logFile.print(sample.gz);
-    logFile.print(",");
-    logFile.print(sample.altitude);
+    logFile.print(sample.ejectionOutputActive ? "HIGH" : "LOW");
     logFile.print(",");
     logFile.println(flightStateName(sample.state));
 }

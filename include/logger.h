@@ -4,7 +4,10 @@
 #include "flightState.h"
 
 bool initLogger();
-void loggerPeriodic(double altitudeMeters, flight_state state);
+void loggerPeriodic(double rawAltitudeMeters,
+                    double filteredAltitudeMeters,
+                    bool ejectionOutputActive,
+                    flight_state state);
 void endFlight();
 
 #endif // LOGGER_H

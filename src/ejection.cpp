@@ -31,3 +31,7 @@ void ejectionPeriodic(flight_state state){
         digitalWrite(MOSFET_PIN, LOW);
    }
 }
+
+bool isEjectionOutputActive(){
+    return digitalRead(MOSFET_PIN) == HIGH;
+}

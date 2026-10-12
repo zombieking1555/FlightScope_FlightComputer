@@ -5,5 +5,6 @@
 void initEjection();
 
 void ejectionPeriodic(flight_state state);
+bool isEjectionOutputActive();
 
 #endif // EJECTION_H
