@@ -5,6 +5,7 @@
 
 struct FlightSample {
     uint32_t time;
+    flight_state state;
 
     float ax;
     float ay;
@@ -33,6 +34,20 @@ long lastFlush = 0;
 void writeSample(const FlightSample& sample);
 void flushCache();
 
+static const char* flightStateName(flight_state state)
+{
+    switch (state) {
+    case INIT: return "INIT";
+    case IDLE: return "IDLE";
+    case LAUNCH: return "LAUNCH";
+    case LANDING: return "LANDING";
+    case LOGGINGUP: return "LOGGINGUP";
+    case LOGGINGDOWN: return "LOGGINGDOWN";
+    case FINISH: return "FINISH";
+    default: return "UNKNOWN";
+    }
+}
+
 bool initLogger()
 {
     SPI.setRX(16);
@@ -59,7 +74,7 @@ bool initLogger()
     logFile = SD.open(fileName, FILE_WRITE);
 
     if (logFile) {
-        logFile.println("time (ms),acceleration x (m/s^2),acceleration y (m/s^2),acceleration z (m/s^2),gyro x (rad),gyro y (rad),gyro z (rad),altitude (m)");
+        logFile.println("time (ms),acceleration x (m/s^2),acceleration y (m/s^2),acceleration z (m/s^2),gyro x (rad),gyro y (rad),gyro z (rad),altitude (m),flight state");
     }
     return true;
 }
@@ -74,6 +89,7 @@ void loggerPeriodic(double altitudeMeters, flight_state state)
     {
         FlightSample sample;
         sample.altitude = altitudeMeters;
+        sample.state = state;
         sample.ax = zeroValue;
         sample.ay = zeroValue;
         sample.az = zeroValue;
@@ -110,7 +126,9 @@ void loggerPeriodic(double altitudeMeters, flight_state state)
         logFile.print(",");
         logFile.print(zeroValue);
         logFile.print(",");
-        logFile.println(altitudeMeters);
+        logFile.print(altitudeMeters);
+        logFile.print(",");
+        logFile.println(flightStateName(state));
 
         // Flush occasionally
         if (millis() - lastFlush > 1000)
@@ -141,6 +159,8 @@ void writeSample(const FlightSample& sample) {
     logFile.print(sample.gz);
     logFile.print(",");
     logFile.print(sample.altitude);
+    logFile.print(",");
+    logFile.println(flightStateName(sample.state));
 }
 
 void flushCache() {

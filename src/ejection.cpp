@@ -5,6 +5,8 @@
 
 #define MOSFET_PIN 9
 
+int EJECTION_LENGTH = 50;
+
 
 void initEjection(){
     pinMode(MOSFET_PIN, OUTPUT);
@@ -14,7 +16,16 @@ void initEjection(){
 void ejectionPeriodic(flight_state state){
    switch (state){
     case LOGGINGDOWN:
-        digitalWrite(MOSFET_PIN, HIGH);
+        if(EJECTION_LENGTH > 0){
+            digitalWrite(MOSFET_PIN, HIGH);
+        }
+
+        EJECTION_LENGTH--;
+
+        if(EJECTION_LENGTH <= 0){
+            digitalWrite(MOSFET_PIN, LOW);
+        }
+
     break;
     default:
         digitalWrite(MOSFET_PIN, LOW);

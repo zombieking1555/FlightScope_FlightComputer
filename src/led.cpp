@@ -3,11 +3,13 @@
 #include "led.h"
 
 #define LED_PIN 15
+#define INPUT_PIN 14
 
 float counter = 0;
 
 void initLed() {
     pinMode(LED_PIN, OUTPUT);
+    pinMode(INPUT_PIN, INPUT);
 }
 
 void ledOn() {
